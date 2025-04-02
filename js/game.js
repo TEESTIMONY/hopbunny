@@ -13,6 +13,9 @@ class NeonRunner {
         this.jumpCooldown = 0;
         this.isMobile = this.checkIfMobile();
         this.lastTouchEnd = 0;
+        this.gameStarted = false; // Add flag to track if game has started
+        this.restartListener = null; // Track restart event listener
+        this.animating = true; // Track animation state
         
         // Mobile touch variables for swipes
         this.touchStartX = 0;
@@ -75,11 +78,11 @@ class NeonRunner {
         this.setupEventListeners();
         
         // UI elements
-        this.scoreElement = document.getElementById('score');
+        this.scoreElement = document.getElementById('score-value');
         this.finalScoreElement = document.getElementById('final-score');
         this.gameOverScreen = document.getElementById('game-over');
         this.gameOverOverlay = document.getElementById('game-over-overlay');
-        document.getElementById('restart-btn').addEventListener('click', () => this.restart());
+        this.speedBar = document.querySelector('.speed-bar');
         
         // Performance monitoring
         this.frameCounter = 0;
@@ -89,6 +92,7 @@ class NeonRunner {
         // Mobile-specific setup
         if (this.isMobile) {
             this.setupMobileControls();
+            this.setupMobileViewport();
         }
         
         // Prevent scroll/zoom behaviors on mobile
@@ -107,20 +111,26 @@ class NeonRunner {
             this.lastTouchEnd = now;
         }, false);
         
-        // Force full screen on iOS
-        if (this.isMobile && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
-            window.scrollTo(0, 0);
-            document.body.style.height = `${window.innerHeight}px`;
-        }
-        
         // Start animation loop
         this.lastTime = 0;
         this.animate();
     }
     
     checkIfMobile() {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-               (window.innerWidth <= 768);
+        // More comprehensive mobile detection
+        const isTouchDevice = ('ontouchstart' in window) || 
+                             (navigator.maxTouchPoints > 0) || 
+                             (navigator.msMaxTouchPoints > 0);
+        
+        const isMobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(navigator.userAgent);
+        
+        const isSmallScreen = window.innerWidth <= 768;
+        
+        // Check if device has orientation capability (most mobile devices)
+        const hasOrientation = typeof window.orientation !== 'undefined' || 
+                              navigator.userAgent.indexOf('IEMobile') !== -1;
+        
+        return (isTouchDevice && (isMobileUserAgent || isSmallScreen)) || hasOrientation;
     }
     
     setupMobileControls() {
@@ -150,6 +160,11 @@ class NeonRunner {
             this.keys.right = true; // INVERTED: left control moves right
             this.keys.left = false;
             leftControl.classList.add('control-active');
+            
+            // Add vibration feedback if supported
+            if (window.navigator && window.navigator.vibrate) {
+                window.navigator.vibrate(40);
+            }
         }, { passive: false });
         
         leftControl.addEventListener('touchend', (e) => {
@@ -166,6 +181,11 @@ class NeonRunner {
             this.keys.left = true; // INVERTED: right control moves left
             this.keys.right = false;
             rightControl.classList.add('control-active');
+            
+            // Add vibration feedback if supported
+            if (window.navigator && window.navigator.vibrate) {
+                window.navigator.vibrate(40);
+            }
         }, { passive: false });
         
         rightControl.addEventListener('touchend', (e) => {
@@ -182,11 +202,54 @@ class NeonRunner {
             if (this.canJump) {
                 this.jump();
                 jumpControl.classList.add('control-active');
+                
+                // Add vibration feedback if supported
+                if (window.navigator && window.navigator.vibrate) {
+                    window.navigator.vibrate(40);
+                }
+                
                 setTimeout(() => {
                     jumpControl.classList.remove('control-active');
                 }, 300);
             }
         }, { passive: false });
+        
+        // Handle screen orientation changes
+        window.addEventListener('orientationchange', () => {
+            // Short delay to let the browser adjust
+            setTimeout(() => {
+                // Adjust camera and renderer
+                this.camera.aspect = window.innerWidth / window.innerHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                
+                // Force redraw of UI elements
+                const ui = document.getElementById('ui');
+                if (ui) {
+                    ui.style.display = 'none';
+                    setTimeout(() => {
+                        ui.style.display = 'block';
+                    }, 10);
+                }
+                
+                // Adjust mobile controls based on orientation
+                if (window.orientation === 90 || window.orientation === -90) {
+                    // Landscape
+                    mobileControls.style.height = '100%';
+                    leftControl.style.width = '40%';
+                    rightControl.style.width = '40%';
+                    jumpControl.style.width = '20%';
+                    jumpControl.style.left = '40%';
+                } else {
+                    // Portrait
+                    mobileControls.style.height = '33%';
+                    leftControl.style.width = '33.33%';
+                    rightControl.style.width = '33.33%';
+                    jumpControl.style.width = '33.34%';
+                    jumpControl.style.left = '33.33%';
+                }
+            }, 100);
+        });
         
         // Add swipe gesture detection to the entire document
         document.addEventListener('touchstart', (e) => {
@@ -253,6 +316,41 @@ class NeonRunner {
             this.touchEndX = 0;
             this.touchEndY = 0;
         }, { passive: true });
+    }
+    
+    setupMobileViewport() {
+        // Find the viewport meta tag or create it if it doesn't exist
+        let viewport = document.querySelector('meta[name="viewport"]');
+        if (!viewport) {
+            viewport = document.createElement('meta');
+            viewport.name = 'viewport';
+            document.head.appendChild(viewport);
+        }
+        
+        // Set optimal viewport settings for mobile
+        viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
+        
+        // Add apple-mobile-web-app-capable meta
+        let appleMeta = document.querySelector('meta[name="apple-mobile-web-app-capable"]');
+        if (!appleMeta) {
+            appleMeta = document.createElement('meta');
+            appleMeta.name = 'apple-mobile-web-app-capable';
+            appleMeta.content = 'yes';
+            document.head.appendChild(appleMeta);
+        }
+        
+        // Fix for iOS height issues
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            document.body.style.height = `${window.innerHeight}px`;
+            window.scrollTo(0, 0);
+            
+            // Apply fullscreen fixes for iOS
+            if (document.body.requestFullscreen) {
+                document.body.requestFullscreen().catch(e => {
+                    console.log('Fullscreen request failed:', e);
+                });
+            }
+        }
     }
     
     createBall() {
@@ -686,6 +784,17 @@ class NeonRunner {
         this.score += Math.floor(this.speed * deltaTime * 10);
         this.scoreElement.textContent = this.score;
         
+        // Update speed indicator bar
+        const speedPercentage = (this.speed / this.maxSpeed) * 100;
+        this.speedBar.style.width = `${speedPercentage}%`;
+        
+        // Change color based on speed
+        if (speedPercentage > 75) {
+            this.speedBar.style.background = 'linear-gradient(90deg, rgba(255, 0, 255, 0.7) 0%, rgba(255, 0, 255, 1) 100%)';
+        } else if (speedPercentage > 50) {
+            this.speedBar.style.background = 'linear-gradient(90deg, rgba(0, 255, 255, 0.7) 0%, rgba(255, 0, 255, 0.8) 100%)';
+        }
+        
         // Increase speed gradually
         if (this.speed < this.maxSpeed) {
             this.speed += this.speedIncrement;
@@ -768,7 +877,11 @@ class NeonRunner {
     }
     
     update(deltaTime) {
-        if (this.gameOver) return;
+        if (this.gameOver) {
+            // Even when game over, we want to update particle effects
+            this.updateParticles(deltaTime);
+            return;
+        }
         
         // Update physics world
         this.world.step(deltaTime);
@@ -779,6 +892,7 @@ class NeonRunner {
         this.updateCamera();
         this.updateScore(deltaTime);
         this.updateAfterImages();
+        this.updateParticles(deltaTime);
         
         // Performance monitoring
         this.frameCounter++;
@@ -794,45 +908,230 @@ class NeonRunner {
     }
     
     animate(time = 0) {
-        const deltaTime = Math.min((time - this.lastTime) / 1000, 0.1);
+        if (this.gameOver) {
+            this.animating = false;
+            return;
+        }
+        
+        this.animating = true;
+        requestAnimationFrame((t) => this.animate(t));
+        
+        // Calculate delta time
+        const deltaTime = Math.min((time - this.lastTime) / 1000, 0.1); // Cap delta time to avoid large jumps
         this.lastTime = time;
         
-        this.update(deltaTime);
+        // Only update game logic if the game has started
+        if (this.gameStarted) {
+            this.update(deltaTime);
+        }
+        
+        // Always render the scene
         this.renderer.render(this.scene, this.camera);
-        requestAnimationFrame(this.animate.bind(this));
     }
     
     endGame() {
         this.gameOver = true;
         this.finalScoreElement.textContent = this.score;
-        this.gameOverScreen.style.display = 'block';
+        
+        // Add dramatic game over effect
+        this.createGameOverEffect();
+        
+        // Show game over screen with a slight delay for dramatic effect
+        this.gameOverOverlay.style.display = 'block';
+        this.gameOverOverlay.style.opacity = '0';
+        
+        // Animate the overlay fade in
+        setTimeout(() => {
+            this.gameOverOverlay.style.transition = 'opacity 0.5s ease-in';
+            this.gameOverOverlay.style.opacity = '1';
+            
+            setTimeout(() => {
+                this.gameOverScreen.style.display = 'block';
+                
+                // Get the restart button and ensure it's clickable
+                const restartBtn = document.getElementById('restart-btn');
+                
+                // Remove any existing event listeners to prevent duplicates
+                if (this.restartListener) {
+                    restartBtn.removeEventListener('click', this.restartListener);
+                }
+                
+                // Create a new restart listener that's properly bound to this instance
+                this.restartListener = this.restart.bind(this);
+                
+                // Add the event listener
+                restartBtn.addEventListener('click', this.restartListener);
+                
+                // Make sure the button is clickable
+                restartBtn.style.pointerEvents = 'auto';
+            }, 500);
+        }, 300);
+    }
+    
+    createGameOverEffect() {
+        // Create explosion effect at ball position
+        const explosionColors = [0x00ffff, 0xff00ff, 0xffffff];
+        const particleCount = this.isMobile ? 30 : 60;
+        
+        for (let i = 0; i < particleCount; i++) {
+            const geometry = new THREE.SphereGeometry(0.2, 8, 8);
+            const material = new THREE.MeshBasicMaterial({
+                color: explosionColors[Math.floor(Math.random() * explosionColors.length)],
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            const particle = new THREE.Mesh(geometry, material);
+            particle.position.copy(this.ball.position);
+            
+            // Random velocity
+            const velocity = new THREE.Vector3(
+                (Math.random() - 0.5) * 20,
+                Math.random() * 15,
+                (Math.random() - 0.5) * 20
+            );
+            
+            this.scene.add(particle);
+            
+            // Add to particles array
+            this.particleGroups.push({
+                mesh: particle,
+                velocity: velocity,
+                gravity: 0.2,
+                lifetime: 1 + Math.random(),
+                created: Date.now() / 1000
+            });
+        }
+        
+        // Hide the ball
+        this.ball.visible = false;
+        this.ballGlow.visible = false;
+        
+        // Create shockwave
+        const shockwaveGeometry = new THREE.RingGeometry(0.1, 0.5, 32);
+        const shockwaveMaterial = new THREE.MeshBasicMaterial({
+            color: 0x00ffff,
+            transparent: true,
+            opacity: 0.7,
+            side: THREE.DoubleSide
+        });
+        
+        const shockwave = new THREE.Mesh(shockwaveGeometry, shockwaveMaterial);
+        shockwave.position.copy(this.ball.position);
+        shockwave.rotation.x = Math.PI / 2;
+        this.scene.add(shockwave);
+        
+        // Animate shockwave
+        const startTime = Date.now();
+        const expandShockwave = () => {
+            const elapsed = (Date.now() - startTime) / 1000;
+            
+            if (elapsed < 1) {
+                const scale = 1 + elapsed * 20;
+                shockwave.scale.set(scale, scale, scale);
+                shockwave.material.opacity = 0.7 * (1 - elapsed);
+                
+                requestAnimationFrame(expandShockwave);
+            } else {
+                this.scene.remove(shockwave);
+            }
+        };
+        
+        expandShockwave();
+        
+        // Create a flash effect
+        const overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.backgroundColor = '#fff';
+        overlay.style.opacity = '0.8';
+        overlay.style.zIndex = '25';
+        overlay.style.pointerEvents = 'none';
+        overlay.style.transition = 'opacity 0.5s ease-out';
+        
+        document.body.appendChild(overlay);
+        
+        setTimeout(() => {
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                document.body.removeChild(overlay);
+            }, 500);
+        }, 100);
     }
     
     restart() {
-        // Clean up current game
-        this.obstacles.forEach(obstacle => {
-            this.scene.remove(obstacle.mesh);
-            this.world.removeBody(obstacle.body);
-        });
-        this.trackSegments.forEach(segment => {
-            this.scene.remove(segment.mesh);
-            this.world.removeBody(segment.body);
-        });
-        this.scene.remove(this.ball);
-        this.world.removeBody(this.ballBody);
+        console.log('Game restart method called');
         
-        // Reset game state
+        // Reset all game state
+        this.gameOver = false;
+        this.gameStarted = true; // Ensure the game starts when restarting
         this.score = 0;
         this.speed = 25;
-        this.gameOver = false;
+        
+        // Clear all game objects
         this.trackSegments = [];
         this.obstacles = [];
+        this.powerups = []; // Clear powerups
+        this.particleGroups = []; // Clear particles
+        this.afterImages = []; // Clear after images
+        
+        // Reset UI
         this.scoreElement.textContent = '0';
+        
+        // Hide game over overlay and screen
+        this.gameOverOverlay.style.display = 'none';
+        this.gameOverOverlay.style.opacity = '0';
         this.gameOverScreen.style.display = 'none';
+        
+        // Reset the speed indicator
+        this.speedBar.style.width = '30%';
+        this.speedBar.style.background = 'linear-gradient(90deg, rgba(0, 255, 255, 0.5) 0%, rgba(0, 255, 255, 0.8) 50%, rgba(255, 0, 255, 0.8) 100%)';
+        
+        // Add restart transition effect
+        const overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.backgroundColor = '#0ff';
+        overlay.style.opacity = '0.3';
+        overlay.style.zIndex = '30';
+        overlay.style.pointerEvents = 'none';
+        overlay.style.transition = 'opacity 0.5s ease-out';
+        
+        document.body.appendChild(overlay);
+        
+        // Create a flash effect
+        setTimeout(() => {
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                document.body.removeChild(overlay);
+            }, 500);
+        }, 100);
+        
+        // Cleanup old objects from scene
+        // Remove all existing meshes/bodies before creating new ones
+        for (let i = this.scene.children.length - 1; i >= 0; i--) {
+            const object = this.scene.children[i];
+            if (object.type === 'Mesh' || object.type === 'Points') {
+                this.scene.remove(object);
+            }
+        }
         
         // Recreate game elements
         this.createBall();
         this.createInitialTrack();
+        
+        // Restart animation loop if it was stopped
+        if (!this.animating) {
+            this.animating = true;
+            this.lastTime = Date.now();
+            this.animate();
+        }
     }
     
     jump() {
@@ -940,25 +1239,45 @@ class NeonRunner {
             }
         }
     }
+    
+    // New method to start the game
+    startGame() {
+        this.gameStarted = true;
+    }
+    
+    updateParticles(deltaTime) {
+        // Update all particle effects
+        const now = Date.now() / 1000;
+        
+        for (let i = this.particleGroups.length - 1; i >= 0; i--) {
+            const particle = this.particleGroups[i];
+            
+            // Check if particle has expired
+            if (now - particle.created > particle.lifetime) {
+                this.scene.remove(particle.mesh);
+                this.particleGroups.splice(i, 1);
+                continue;
+            }
+            
+            // Apply velocity and gravity
+            particle.velocity.y -= particle.gravity;
+            particle.mesh.position.x += particle.velocity.x * deltaTime;
+            particle.mesh.position.y += particle.velocity.y * deltaTime;
+            particle.mesh.position.z += particle.velocity.z * deltaTime;
+            
+            // Fade out over lifetime
+            const age = now - particle.created;
+            const opacity = 1 - (age / particle.lifetime);
+            particle.mesh.material.opacity = opacity;
+        }
+    }
 }
 
-// Start the game when page is loaded
-window.addEventListener('load', () => {
-    // Detect if device orientation is supported and request permission on iOS
-    if (typeof DeviceOrientationEvent !== 'undefined' && 
-        typeof DeviceOrientationEvent.requestPermission === 'function') {
-        // iOS 13+ requires permission to use device orientation
-        document.body.addEventListener('click', () => {
-            DeviceOrientationEvent.requestPermission()
-                .then(response => {
-                    if (response === 'granted') {
-                        new NeonRunner();
-                    }
-                })
-                .catch(console.error);
-        }, { once: true });
-    } else {
-        // Start game immediately on other devices
-        new NeonRunner();
-    }
-}); 
+// Initialize the game but don't start it yet
+const game = new NeonRunner();
+
+// Expose the game and startGame method globally
+window.game = game;
+window.startGame = function() {
+    game.startGame();
+}; 
