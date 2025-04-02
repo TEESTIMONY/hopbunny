@@ -2,13 +2,13 @@ class NeonRunner {
     constructor() {
         // Game state
         this.score = 0;
-        this.speed = 25;
-        this.maxSpeed = 80;
-        this.speedIncrement = 0.03;
+        this.speed = 20;
+        this.maxSpeed = 65;
+        this.speedIncrement = 0.02;
         this.gameOver = false;
-        this.trackWidth = 12;
+        this.trackWidth = 14;
         this.trackLength = 300;
-        this.obstacleSpacing = 25;
+        this.obstacleSpacing = 27;
         this.canJump = true;
         this.jumpCooldown = 0;
         this.isMobile = this.checkIfMobile();
@@ -433,17 +433,18 @@ class NeonRunner {
     }
     
     createObstacle(zPosition, xOffset = 0) {
-        // Reduce ramp probability from 30% to 15%
-        const type = Math.random() > 0.85 ? 'ramp' : 'cube';
-        // Use the xOffset if provided, otherwise use random lane position
+        // Reduce ramp probability from 15% to 20% (more ramps are easier)
+        const type = Math.random() > 0.8 ? 'ramp' : 'cube';
+        // Use the xOffset if provided, otherwise use random lane position with more constraint
+        // Keep obstacles more toward the edges to leave a clearer path in the middle
         const lanePosition = xOffset !== 0 ? 
             xOffset : 
-            (Math.random() * 2 - 1) * (this.trackWidth / 2 - 1.5);
+            (Math.random() > 0.5 ? 1 : -1) * (2.5 + Math.random() * 3);
         
         if (type === 'cube') {
             // Cube obstacle
-            const size = 1 + Math.random() * 1.5;
-            const height = 1 + Math.random() * 2;
+            const size = 1 + Math.random() * 1.8; // Reduced size range from (1-2.5) to (0.8-2.0)
+            const height = 0.8 + Math.random() * 1.5; // Reduced height range from (1-3) to (0.8-2.3)
             
             // Physics body
             const boxShape = new CANNON.Box(new CANNON.Vec3(size / 2, height / 2, size / 2));
@@ -522,14 +523,14 @@ class NeonRunner {
         for (let z = 0; z < this.trackLength; z += 20) {
             const segment = this.createTrackSegment(z);
             
-            // Add obstacles with spacing - increased frequency by changing condition
-            if (z > 30 && z % 15 === 0) {  // Changed from 25 to 15 for more frequent obstacles
+            // Add obstacles with spacing - decreased frequency
+            if (z > 40 && z % 25 === 0) {  // Changed from 15 to 25 for fewer obstacles, and start further (30 to 40)
                 this.createObstacle(z);
                 
-                // Add a second obstacle with offset - sometimes on the same z-coordinate
-                if (Math.random() > 0.6) {
+                // Add a second obstacle with offset - decreased probability
+                if (Math.random() > 0.7) { // Reduced from 0.6 to 0.7 (30% chance instead of 40%)
                     const offsetX = (Math.random() > 0.5 ? 1 : -1) * (2 + Math.random() * 3);
-                    const offsetZ = Math.random() * 7;
+                    const offsetZ = Math.random() * 10; // Increased offset from 7 to 10
                     this.createObstacle(z + offsetZ, offsetX);
                 }
             }
@@ -684,14 +685,14 @@ class NeonRunner {
                 const newPosition = lastSegment.position + lastSegment.length;
                 this.createTrackSegment(newPosition);
                 
-                // Increased chance of obstacles from 0.5 to 0.7
-                if (Math.random() > 0.3) {
+                // Decreased chance of obstacles from 0.7 to 0.5
+                if (Math.random() > 0.5) {
                     this.createObstacle(newPosition + Math.random() * 15);
                     
-                    // Add a second obstacle with offset
-                    if (Math.random() > 0.5) {
+                    // Add a second obstacle with offset - decreased probability
+                    if (Math.random() > 0.6) { // From 0.5 to 0.6 (40% chance instead of 50%)
                         const offsetX = (Math.random() > 0.5 ? 1 : -1) * (2 + Math.random() * 3);
-                        const offsetZ = Math.random() * 7;
+                        const offsetZ = Math.random() * 10; // Increased offset from 7 to 10
                         this.createObstacle(newPosition + offsetZ, offsetX);
                     }
                 }
@@ -716,7 +717,7 @@ class NeonRunner {
     
     updateBall(deltaTime) {
         // Apply forces based on keys - increased force for more responsive controls
-        const force = 300; // Increased from 200 for faster response
+        const force = 350; // Increased from 300 for even faster response
         
         if (this.keys.left) {
             this.ballBody.applyForce(new CANNON.Vec3(-force, 0, 0), this.ballBody.position);
@@ -727,7 +728,7 @@ class NeonRunner {
         
         // Add some automatic centering when no keys are pressed for stability
         if (!this.keys.left && !this.keys.right) {
-            const centeringForce = this.ballBody.position.x * -10;
+            const centeringForce = this.ballBody.position.x * -15; // Increased from -10 to -15 for stronger centering
             this.ballBody.applyForce(new CANNON.Vec3(centeringForce, 0, 0), this.ballBody.position);
         }
         
@@ -808,7 +809,7 @@ class NeonRunner {
             if (this.speedBoostTime <= 0) {
                 this.hasSpeedBoost = false;
                 // Reset normal speed max
-                this.maxSpeed = 80;
+                this.maxSpeed = 65;
             }
         }
         
@@ -1069,7 +1070,7 @@ class NeonRunner {
         this.gameOver = false;
         this.gameStarted = true; // Ensure the game starts when restarting
         this.score = 0;
-        this.speed = 25;
+        this.speed = 20;
         
         // Clear all game objects
         this.trackSegments = [];
@@ -1135,13 +1136,13 @@ class NeonRunner {
     }
     
     jump() {
-        // Apply upward force to ball - significantly reduced jump power
-        const jumpForce = this.hasSuperJump ? 200 : 100; // Reduced from 350/200 to 250/150
+        // Apply upward force to ball - increased jump power
+        const jumpForce = this.hasSuperJump ? 250 : 150; // Increased from 200/100 to 250/150
         this.ballBody.applyImpulse(new CANNON.Vec3(0, jumpForce, 0), this.ballBody.position);
         
-        // Set jump cooldown
+        // Set jump cooldown - reduced from 0.8 to 0.6 seconds
         this.canJump = false;
-        this.jumpCooldown = 0.8; // Seconds before can jump again
+        this.jumpCooldown = 0.6; // Seconds before can jump again
         
         // Add jump visual effect
         this.createJumpEffect();
@@ -1201,11 +1202,12 @@ class NeonRunner {
             const obstacleSize = obstacle.body.shapes[0].halfExtents;
             
             // Calculate distance threshold based on ball radius (1) and obstacle size
-            const threshold = 1 + Math.max(obstacleSize.x, obstacleSize.z);
+            // Reduced collision threshold slightly to be more forgiving
+            const threshold = 0.9 + Math.max(obstacleSize.x, obstacleSize.z);
             
             // Check if distance is less than threshold in x and z, and we're not clearly above the obstacle
             const horizontalDist = Math.sqrt(dx * dx + dz * dz);
-            if (horizontalDist < threshold && dy < obstacleSize.y + 0.5) {
+            if (horizontalDist < threshold && dy < obstacleSize.y + 0.4) { // Reduced from 0.5 to 0.4 for more forgiveness
                 // Create a flash effect on collision
                 this.createCollisionEffect();
                 this.endGame();
