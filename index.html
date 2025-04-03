@@ -35,6 +35,7 @@
             color: #fff;
             font-size: 28px;
             font-weight: bold;
+            display: flex;
             z-index: 10;
             pointer-events: none;
             padding: 15px;
@@ -42,6 +43,7 @@
             border-bottom: 3px solid #5ea8ff;
             border-radius: 8px;
             box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+            justify-content: space-between;
         }
         #score-value {
             font-size: 1.2em;
@@ -66,12 +68,12 @@
             font-size: 24px;
             text-align: center;
             z-index: 20;
-            background-color: rgba(41, 128, 255, 0.9);
+            background-color: rgba(1, 26, 63, 0.9);
             padding: 30px;
             border-radius: 20px;
             width: 280px;
             max-width: 90%;
-            border: 4px solid #5ea8ff;
+            border: 4px solid #022246;
             box-shadow: 0 10px 0 rgba(0, 0, 0, 0.2);
             display: none;
             animation: fadeIn 0.5s ease-out;
@@ -84,7 +86,7 @@
             left: 0;
             right: 0;
             height: 8px;
-            background: #5ea8ff;
+            background: rgba(1, 26, 63, 0.9);
             border-radius: 4px 4px 0 0;
         }
         
@@ -148,7 +150,7 @@
             z-index: 10;
             background: none;
             pointer-events: none;
-            opacity: 1;
+            opacity: 0.3;
             transition: opacity 0.5s ease;
         }
         #left-control, #right-control, #jump-control {
@@ -156,7 +158,7 @@
             width: 33.33%;
             height: 100%;
             bottom: 0;
-            opacity: 0.3;
+            opacity: 0.1;
             background-color: #2f80ed;
             border: 2px solid #5ea8ff;
             border-radius: 15px 15px 0 0;
@@ -403,7 +405,7 @@
         @media (max-width: 768px) {
             #mobile-controls {
                 display: block;
-                opacity: 1;
+                opacity: .5;
             }
             #ui {
                 top: 10px;
@@ -559,26 +561,16 @@
         
         /* Enhanced UI elements */
         .speed-indicator {
-            position: absolute;
+            /* Hide visually but keep in DOM for game functionality */
+            opacity: 0;
+            height: 8px;
+            width: 200px;
             bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 300px;
-            height: 12px;
-            background: rgba(41, 128, 255, 0.5);
-            border: 3px solid #5ea8ff;
-            border-radius: 10px;
-            z-index: 20;
-            overflow: hidden;
-            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
         }
         
         .speed-bar {
             height: 100%;
             width: 30%;
-            background: linear-gradient(90deg, 
-                #c3e0ff 0%, 
-                #5ea8ff 100%);
         }
         
         #fx-container {
@@ -593,6 +585,7 @@
     </style>
     <!-- Add Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&family=Fredoka+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Bubblegum Sans', cursive;
@@ -604,11 +597,112 @@
             font-family: 'Bubblegum Sans', cursive;
         }
     </style>
+    <!-- Advanced track and obstacle styles -->
+    <style id="advanced-game-styles">
+        /* Enhanced track and obstacles styling */
+        .advanced-track {
+            filter: drop-shadow(0 0 12px rgba(79, 172, 254, 0.8));
+        }
+        
+        .advanced-obstacle {
+            filter: drop-shadow(0 0 15px rgba(255, 100, 100, 0.8));
+        }
+        
+        /* This will be applied by JS */
+        canvas {
+            transition: filter 0.5s ease;
+        }
+        
+        /* Post-processing overlay for advanced visual effects */
+        .post-process-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 11;
+            mix-blend-mode: screen;
+            opacity: 0.15;
+            background: radial-gradient(circle at center, 
+                rgba(100, 200, 255, 0.15) 0%, 
+                rgba(50, 100, 200, 0.05) 70%, 
+                rgba(0, 20, 80, 0) 100%);
+            animation: pulse-overlay 8s infinite alternate ease-in-out;
+        }
+        
+        @keyframes pulse-overlay {
+            0% { opacity: 0.05; }
+            50% { opacity: 0.15; }
+            100% { opacity: 0.05; }
+        }
+        
+        /* Grid overlay for tech/sci-fi feel */
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(79, 172, 254, 0.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(79, 172, 254, 0.07) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: 5;
+            pointer-events: none;
+            opacity: 0.5;
+            transform: perspective(500px) rotateX(60deg);
+            transform-origin: center bottom;
+            animation: grid-scroll 30s infinite linear;
+        }
+        
+        @keyframes grid-scroll {
+            from { background-position: 0 0; }
+            to { background-position: 0 30px; }
+        }
+        
+        /* Ambient particles for atmospheric effect */
+        .particle {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 10;
+            box-shadow: 0 0 10px 2px rgba(150, 220, 255, 0.8);
+            animation: particle-float 15s infinite linear;
+        }
+        
+        @keyframes particle-float {
+            0% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 0.7; }
+            90% { opacity: 0.7; }
+            100% { transform: translateY(-2000%) translateX(100px); opacity: 0; }
+        }
+        
+        /* Dynamic lighting and shadows */
+        #particles-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 6;
+            overflow: hidden;
+        }
+    </style>
 </head>
 <body>
     <div id="ui">
-        <span id="score-label">SCORE:</span> <span id="score-value">0</span>
-        <div class="speed-indicator">
+        <div class="score-container">
+            <span id="score-label">SCORE:</span> <span id="score-value">0</span>
+        </div>
+        <div class="progress-indicator">
+            <span id="progress-value"></span>
+        </div>
+        <!-- Keep speed indicator but hide it visually -->
+        <div class="speed-indicator" style="visibility: hidden; position: absolute; pointer-events: none;">
             <div class="speed-bar"></div>
         </div>
     </div>
@@ -616,6 +710,7 @@
     <!-- Visual effects overlays -->
     <div id="fx-container">
         <div class="vignette"></div>
+        <div class="grid-overlay"></div>
     </div>
     
     <!-- Game over overlay that darkens the background -->
@@ -658,6 +753,399 @@
     
     <!-- Game Scripts -->
     <script src="js/game.js"></script>
+    
+    <!-- Track & Obstacle Enhancement Script -->
+    <script>
+        // Enhanced track and obstacle appearance - City Skyline Version
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create post-processing overlay and particle container
+            const postProcessOverlay = document.createElement('div');
+            postProcessOverlay.className = 'post-process-overlay';
+            document.getElementById('fx-container').appendChild(postProcessOverlay);
+            
+            const particlesContainer = document.createElement('div');
+            particlesContainer.id = 'particles-container';
+            document.getElementById('fx-container').appendChild(particlesContainer);
+            
+            // Create ambient particles - reduced number for cleaner look
+            function createParticles() {
+                for(let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        const particle = document.createElement('div');
+                        particle.className = 'particle';
+                        
+                        // Random size, position and animation duration
+                        const size = Math.random() * 1.5 + 0.5;
+                        const posX = Math.random() * window.innerWidth;
+                        const duration = Math.random() * 6000 + 6000;
+                        
+                        particle.style.width = `${size}px`;
+                        particle.style.height = `${size}px`;
+                        particle.style.left = `${posX}px`;
+                        particle.style.bottom = '0';
+                        particle.style.opacity = '0';
+                        particle.style.animationDuration = `${duration}ms`;
+                        
+                        particlesContainer.appendChild(particle);
+                        
+                        // Remove particle after animation completes
+                        setTimeout(() => {
+                            if (particle.parentNode) {
+                                particle.parentNode.removeChild(particle);
+                            }
+                        }, duration + 100);
+                    }, i * 1000);
+                }
+            }
+            
+            // Initialize particles
+            createParticles();
+            // Periodically refresh particles
+            setInterval(createParticles, 12000);
+            
+            // Wait for game to initialize
+            setTimeout(function() {
+                enhanceGameAppearance();
+            }, 500);
+            
+            function enhanceGameAppearance() {
+                // Get the WebGL renderer canvas
+                const canvas = document.querySelector('canvas');
+                if (!canvas) return;
+                
+                // Apply gentle post-processing effect
+                canvas.style.filter = 'contrast(1.2) saturate(1.1) brightness(0.95)';
+                
+                // Change background color to match a darker night sky
+                document.body.style.background = '#0a1a2e';
+                
+                // Inject styles into the game context if possible
+                if (window.game) {
+                    // Wait a bit for game to fully initialize
+                    setTimeout(() => {
+                        try {
+                            // Update scene background to match night city theme
+                            if (window.game.scene) {
+                                // Set a dark blue night sky color
+                                window.game.scene.background = new THREE.Color(0x0a1a2e);
+                                
+                                // Set a subtle fog for night atmosphere
+                                if (window.game.scene.fog) {
+                                    window.game.scene.fog.color = new THREE.Color(0x0a1a2e); // Dark blue
+                                    window.game.scene.fog.density = 0.015;
+                                } else {
+                                    window.game.scene.fog = new THREE.FogExp2(0x0a1a2e, 0.015);
+                                }
+                                
+                                // Create cityscape in the background - nighttime version
+                                createCityscape();
+                            }
+                            
+                            // Function to create a cityscape background - night version
+                            function createCityscape() {
+                                // Create multiple buildings
+                                const numberOfBuildings = 60;
+                                
+                                for (let i = 0; i < numberOfBuildings; i++) {
+                                    // Randomize building properties
+                                    const buildingHeight = 10 + Math.random() * 30;
+                                    const buildingWidth = 5 + Math.random() * 10;
+                                    const buildingDepth = 5 + Math.random() * 10;
+                                    
+                                    // Create building geometry
+                                    const geometry = new THREE.BoxGeometry(buildingWidth, buildingHeight, buildingDepth);
+                                    
+                                    // Building color (dark gray with slight variations for night theme)
+                                    const colorValue = 0.1 + Math.random() * 0.15;
+                                    const color = new THREE.Color(colorValue, colorValue, colorValue + 0.05);
+                                    
+                                    const material = new THREE.MeshStandardMaterial({
+                                        color: color,
+                                        roughness: 0.7,
+                                        metalness: 0.2,
+                                        emissive: new THREE.Color(colorValue * 0.5, colorValue * 0.5, colorValue * 0.6),
+                                        emissiveIntensity: 0.1
+                                    });
+                                    
+                                    const building = new THREE.Mesh(geometry, material);
+                                    
+                                    // Position buildings on both sides of the track
+                                    const side = Math.random() > 0.5 ? 1 : -1;
+                                    const distance = 15 + Math.random() * 50;
+                                    building.position.x = side * distance;
+                                    building.position.y = buildingHeight / 2 - 5;
+                                    
+                                    // Position buildings ahead and behind but more ahead
+                                    const zOffset = Math.random() * 300 - 50;
+                                    building.position.z = zOffset;
+                                    
+                                    // Add windows to buildings - night version with lit windows
+                                    addWindowsToBuilding(building, buildingWidth, buildingHeight, buildingDepth);
+                                    
+                                    // Add building to scene
+                                    window.game.scene.add(building);
+                                }
+                            }
+                            
+                            // Add windows to buildings - night version
+                            function addWindowsToBuilding(building, width, height, depth) {
+                                // Window rows and columns
+                                const rows = Math.floor(height / 2.5);
+                                const colsX = Math.floor(width / 2);
+                                const colsZ = Math.floor(depth / 2);
+                                
+                                // Window size and spacing
+                                const windowSize = 0.8;
+                                const windowDepth = 0.1;
+                                
+                                // Window colors for night theme (warm yellow/white)
+                                const windowColors = [
+                                    0xffdd99, // Warm yellow
+                                    0xffffcc, // Warm white
+                                    0xffaa55, // Orange glow
+                                    0xeeeeff  // Cool white
+                                ];
+                                
+                                // Add windows to all sides of the building
+                                for (let side = 0; side < 4; side++) {
+                                    const cols = side % 2 === 0 ? colsX : colsZ;
+                                    
+                                    for (let row = 0; row < rows; row++) {
+                                        for (let col = 0; col < cols; col++) {
+                                            // Random chance for window to be lit (higher probability in night mode)
+                                            if (Math.random() > 0.5) {
+                                                // Random color from palette
+                                                const windowColor = windowColors[Math.floor(Math.random() * windowColors.length)];
+                                                
+                                                // Window geometry and material
+                                                const windowGeometry = new THREE.BoxGeometry(windowSize, windowSize, windowDepth);
+                                                const windowMaterial = new THREE.MeshBasicMaterial({
+                                                    color: windowColor,
+                                                    transparent: true,
+                                                    opacity: 0.9,
+                                                    emissive: windowColor,
+                                                    emissiveIntensity: 0.8
+                                                });
+                                                
+                                                const window = new THREE.Mesh(windowGeometry, windowMaterial);
+                                                
+                                                // Position window based on side
+                                                switch(side) {
+                                                    case 0: // Front
+                                                        window.position.set(
+                                                            -width/2 + col * (width/cols) + (width/cols/2),
+                                                            -height/2 + row * (height/rows) + (height/rows/2),
+                                                            depth/2 + windowDepth/2
+                                                        );
+                                                        break;
+                                                    case 1: // Right
+                                                        window.position.set(
+                                                            width/2 + windowDepth/2,
+                                                            -height/2 + row * (height/rows) + (height/rows/2),
+                                                            -depth/2 + col * (depth/cols) + (depth/cols/2)
+                                                        );
+                                                        window.rotation.y = Math.PI/2;
+                                                        break;
+                                                    case 2: // Back
+                                                        window.position.set(
+                                                            width/2 - col * (width/cols) - (width/cols/2),
+                                                            -height/2 + row * (height/rows) + (height/rows/2),
+                                                            -depth/2 - windowDepth/2
+                                                        );
+                                                        break;
+                                                    case 3: // Left
+                                                        window.position.set(
+                                                            -width/2 - windowDepth/2,
+                                                            -height/2 + row * (height/rows) + (height/rows/2),
+                                                            depth/2 - col * (depth/cols) - (depth/cols/2)
+                                                        );
+                                                        window.rotation.y = Math.PI/2;
+                                                        break;
+                                                }
+                                                
+                                                // Add a point light inside some windows for glow effect
+                                                if (Math.random() > 0.85) {
+                                                    const windowLight = new THREE.PointLight(windowColor, 0.5, 3);
+                                                    windowLight.position.set(0, 0, 0.2);
+                                                    window.add(windowLight);
+                                                }
+                                                
+                                                building.add(window);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // Enhance lighting to match night scene
+                            if (window.game.scene) {
+                                // Remove previous enhancement lights first to avoid duplicates
+                                window.game.scene.children = window.game.scene.children.filter(child => 
+                                    !(child.isLight && child.userData.isEnhancementLight));
+                                
+                                // Add subtle ambient light for night scene
+                                const ambientLight = new THREE.AmbientLight(0x223355, 0.4);
+                                ambientLight.userData.isEnhancementLight = true;
+                                window.game.scene.add(ambientLight);
+                                
+                                // Add moonlight
+                                const moonLight = new THREE.DirectionalLight(0x557799, 0.5);
+                                moonLight.position.set(-10, 30, 10);
+                                moonLight.userData.isEnhancementLight = true;
+                                window.game.scene.add(moonLight);
+                                
+                                // Add point light that follows the player with blue glow
+                                if (window.game.ballMesh) {
+                                    const playerLight = new THREE.PointLight(0x66ccff, 0.8, 15);
+                                    playerLight.userData.isEnhancementLight = true;
+                                    playerLight.position.copy(window.game.ballMesh.position);
+                                    playerLight.position.y += 3;
+                                    window.game.scene.add(playerLight);
+                                    
+                                    // Update light position in animation loop
+                                    const originalAnimate = window.game.animate;
+                                    window.game.animate = function(time) {
+                                        if (window.game.ballMesh && playerLight) {
+                                            playerLight.position.copy(window.game.ballMesh.position);
+                                            playerLight.position.y += 3;
+                                        }
+                                        
+                                        if (originalAnimate) {
+                                            originalAnimate.call(window.game, time);
+                                        }
+                                    };
+                                }
+                                
+                                // Add some street lights along the track
+                                addStreetLights();
+                            }
+                            
+                            // Function to add street lights
+                            function addStreetLights() {
+                                if (!window.game.trackSegments) return;
+                                
+                                // Add street lights every N segments
+                                const lightSpacing = 6; // Every 6 segments
+                                
+                                for (let i = 0; i < window.game.trackSegments.length; i += lightSpacing) {
+                                    const segment = window.game.trackSegments[i];
+                                    if (!segment || !segment.mesh) continue;
+                                    
+                                    // Create lamp post on both sides
+                                    for (let side = -1; side <= 1; side += 2) {
+                                        // Create lamp post
+                                        const postGeometry = new THREE.CylinderGeometry(0.2, 0.2, 5, 8);
+                                        const postMaterial = new THREE.MeshStandardMaterial({
+                                            color: 0x333333,
+                                            roughness: 0.8,
+                                            metalness: 0.5
+                                        });
+                                        
+                                        const post = new THREE.Mesh(postGeometry, postMaterial);
+                                        post.position.set(side * 8, 2.5, 0);
+                                        
+                                        // Create lamp head
+                                        const lampGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+                                        const lampMaterial = new THREE.MeshBasicMaterial({
+                                            color: 0xffffaa,
+                                            transparent: true,
+                                            opacity: 0.9
+                                        });
+                                        
+                                        const lamp = new THREE.Mesh(lampGeometry, lampMaterial);
+                                        lamp.position.set(0, 2.5, 0);
+                                        
+                                        // Add light source
+                                        const lampLight = new THREE.PointLight(0xffffcc, 1, 15);
+                                        lampLight.position.copy(lamp.position);
+                                        
+                                        // Add to scene
+                                        post.add(lamp);
+                                        post.add(lampLight);
+                                        
+                                        // Attach to segment
+                                        segment.mesh.add(post);
+                                    }
+                                }
+                            }
+                            
+                            // Create some stars in the night sky
+                            createStars();
+                            
+                            function createStars() {
+                                // Create a star field
+                                const starCount = 1000;
+                                const starGeometry = new THREE.BufferGeometry();
+                                const starPositions = [];
+                                
+                                for (let i = 0; i < starCount; i++) {
+                                    const x = (Math.random() - 0.5) * 1000;
+                                    const y = Math.random() * 300 + 50; // Stars above the horizon
+                                    const z = (Math.random() - 0.5) * 1000;
+                                    
+                                    starPositions.push(x, y, z);
+                                }
+                                
+                                starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
+                                
+                                // Slightly varying star colors
+                                const starColors = [0xffffff, 0xffffdd, 0xddddff];
+                                
+                                for (let i = 0; i < 3; i++) { // Different sized star groups
+                                    const starMaterial = new THREE.PointsMaterial({
+                                        color: starColors[i],
+                                        size: 0.5 + i * 0.5, // Different sizes
+                                        transparent: true,
+                                        opacity: 0.8,
+                                        sizeAttenuation: true
+                                    });
+                                    
+                                    const stars = new THREE.Points(starGeometry, starMaterial);
+                                    window.game.scene.add(stars);
+                                }
+                            }
+                            
+                            // Modify the post-process overlay to be darker and more intense
+                            const existingOverlay = document.querySelector('.post-process-overlay');
+                            if (existingOverlay) {
+                                existingOverlay.style.background = 'radial-gradient(circle at center, rgba(20, 80, 150, 0.15) 0%, rgba(10, 30, 70, 0.1) 70%, rgba(5, 15, 35, 0.05) 100%)';
+                                existingOverlay.style.opacity = '0.25';
+                                existingOverlay.style.mixBlendMode = 'soft-light';
+                            }
+                            
+                            // Modify the grid overlay for a more tech/cyberpunk feel
+                            const gridOverlay = document.querySelector('.grid-overlay');
+                            if (gridOverlay) {
+                                gridOverlay.style.backgroundImage = 'linear-gradient(rgba(0, 180, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 180, 255, 0.1) 1px, transparent 1px)';
+                                gridOverlay.style.backgroundSize = '30px 30px';
+                                gridOverlay.style.opacity = '0.6';
+                            }
+                            
+                            console.log("City skyline and yellow track styling applied");
+                        } catch (error) {
+                            console.error("Error enhancing game appearance:", error);
+                        }
+                    }, 1000);
+                }
+            }
+            
+            // Add style enhancing when game restarts
+            const restartBtn = document.getElementById('restart-btn');
+            if (restartBtn) {
+                restartBtn.addEventListener('click', function() {
+                    setTimeout(enhanceGameAppearance, 1500);
+                });
+            }
+            
+            // Also add style enhancing when game starts
+            const playBtn = document.getElementById('play-btn');
+            if (playBtn) {
+                playBtn.addEventListener('click', function() {
+                    setTimeout(enhanceGameAppearance, 1500);
+                });
+            }
+        });
+    </script>
     
     <script>
         // Start screen functionality
