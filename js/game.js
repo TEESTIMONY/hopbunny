@@ -354,7 +354,7 @@ class NeonRunner {
     }
     
     createBall() {
-        // Physics body
+        // Physics body - keep the same collision shape for simplicity
         const radius = 1;
         const ballShape = new CANNON.Sphere(radius);
         this.ballBody = new CANNON.Body({
@@ -366,31 +366,55 @@ class NeonRunner {
         });
         this.world.addBody(this.ballBody);
         
-        // Visual mesh with quality-based settings
-        const segments = this.isMobile ? 16 : 32; // Reduce geometry complexity on mobile
-        const geometry = new THREE.SphereGeometry(radius, segments, segments);
+        // Create a bunny instead of a sphere
+        this.createBunnyModel();
+    }
+    
+    createBunnyModel() {
+        // Create a group to hold the bunny sprite
+        this.bunnyGroup = new THREE.Group();
         
-        // Create a ball with a glowing effect and trail
-        const material = new THREE.MeshStandardMaterial({
-            color: 0x00ffff,
-            emissive: 0x00ffff,
-            emissiveIntensity: 0.5,
-            transparent: true,
-            opacity: 0.9
+        // Load the bunny image from img1.png
+        const textureLoader = new THREE.TextureLoader();
+        const bunnyTexture = textureLoader.load('img/img1.png', (texture) => {
+            console.log('Bunny texture loaded successfully');
+        }, undefined, (err) => {
+            console.error('Error loading bunny texture:', err);
         });
         
-        this.ball = new THREE.Mesh(geometry, material);
-        this.scene.add(this.ball);
+        // Create a sprite material using the loaded texture
+        const bunnyMaterial = new THREE.SpriteMaterial({ 
+            map: bunnyTexture,
+            transparent: true
+        });
         
-        // Add a glow effect to the ball
-        const glowGeometry = new THREE.SphereGeometry(radius * 1.2, segments, segments);
-        const glowMaterial = new THREE.MeshBasicMaterial({
-            color: 0x00ffff,
+        // Create the sprite with the bunny image
+        const bunnySprite = new THREE.Sprite(bunnyMaterial);
+        
+        // Scale the sprite appropriately - making it bigger
+        bunnySprite.scale.set(6, 6, 1);
+        
+        // Add the sprite to the group
+        this.bunnyGroup.add(bunnySprite);
+        
+        // Position the group
+        this.bunnyGroup.position.set(0, 0, 0);
+        
+        // Add the bunny to the scene
+        this.scene.add(this.bunnyGroup);
+        
+        // This replaces the ball reference for other functions
+        this.ball = this.bunnyGroup;
+        
+        // Add a subtle glow effect around the bunny
+        const glowGeometry = new THREE.SphereGeometry(3, 16, 16);
+        const glowMaterialBunny = new THREE.MeshBasicMaterial({
+            color: 0x00aaff,
             transparent: true,
-            opacity: 0.3,
+            opacity: 0.2,
             side: THREE.BackSide
         });
-        this.ballGlow = new THREE.Mesh(glowGeometry, glowMaterial);
+        this.ballGlow = new THREE.Mesh(glowGeometry, glowMaterialBunny);
         this.scene.add(this.ballGlow);
     }
     
@@ -732,12 +756,35 @@ class NeonRunner {
             this.ballBody.applyForce(new CANNON.Vec3(centeringForce, 0, 0), this.ballBody.position);
         }
         
-        // Update ball position and rotation
-        this.ball.position.copy(this.ballBody.position);
-        this.ball.quaternion.copy(this.ballBody.quaternion);
+        // Update bunny position to match physics body
+        if (this.bunnyGroup) {
+            this.bunnyGroup.position.copy(this.ballBody.position);
+            // Adjust the height to make the sprite hover slightly above ground
+            this.bunnyGroup.position.y += 2.0;
+            
+            // Tilt the sprite based on horizontal movement
+            const tiltAmount = this.ballBody.velocity.x * 0.03;
+            this.bunnyGroup.rotation.z = -tiltAmount;
+            
+            // Always face the camera
+            this.bunnyGroup.rotation.y = Math.atan2(
+                -(this.camera.position.x - this.bunnyGroup.position.x),
+                -(this.camera.position.z - this.bunnyGroup.position.z)
+            );
+            
+            // Bounce effect when jumping or running
+            if (this.canJump) {
+                // Subtle bouncing effect when on ground
+                this.bunnyGroup.position.y += Math.sin(Date.now() * 0.01) * 0.15;
+            } else {
+                // Tilt forward slightly when in the air
+                this.bunnyGroup.rotation.x = 0.2;
+            }
+        }
         
         // Update glow position
         this.ballGlow.position.copy(this.ballBody.position);
+        this.ballGlow.position.y += 2.0;
         
         // Add trail/after-image effect
         if (this.hasSpeedBoost && Math.random() > 0.6) {
@@ -747,7 +794,7 @@ class NeonRunner {
         // Update powerup states
         this.updatePowerups(deltaTime);
         
-        // Check if ball fell off the track
+        // Check if bunny fell off the track
         if (this.ballBody.position.y < -10) {
             this.endGame();
         }
@@ -760,7 +807,7 @@ class NeonRunner {
             }
         }
         
-        // Check if ball can jump (approximately on ground)
+        // Check if bunny can jump (approximately on ground)
         const groundContact = this.ballBody.position.y <= 1.1;
         if (groundContact) {
             this.canJump = true;
@@ -771,13 +818,19 @@ class NeonRunner {
     }
     
     updateCamera() {
-        // Camera follows the ball with offset
+        // Camera follows the bunny with improved offset and angle
+        const idealHeight = 8;
+        const lookAheadDistance = 15;
+        
         this.camera.position.x = this.ball.position.x * 0.3;
-        this.camera.position.z = this.ball.position.z - 15;
+        this.camera.position.y = this.ball.position.y + idealHeight;
+        this.camera.position.z = this.ball.position.z - 20;
+        
+        // Look ahead of the bunny to see more of the track
         this.camera.lookAt(
             this.ball.position.x * 0.3,
-            this.ball.position.y + 3,
-            this.ball.position.z + 10
+            this.ball.position.y + 2,
+            this.ball.position.z + lookAheadDistance
         );
     }
     
@@ -970,7 +1023,7 @@ class NeonRunner {
     }
     
     createGameOverEffect() {
-        // Create explosion effect at ball position
+        // Create explosion effect at bunny position
         const explosionColors = [0x00ffff, 0xff00ff, 0xffffff];
         const particleCount = this.isMobile ? 30 : 60;
         
@@ -983,7 +1036,14 @@ class NeonRunner {
             });
             
             const particle = new THREE.Mesh(geometry, material);
-            particle.position.copy(this.ball.position);
+            // Use the bunny position for particles
+            if (this.bunnyGroup) {
+                particle.position.copy(this.bunnyGroup.position);
+                // Add some height to the particle origin
+                particle.position.y += 1;
+            } else {
+                particle.position.copy(this.ball.position);
+            }
             
             // Random velocity
             const velocity = new THREE.Vector3(
@@ -1004,8 +1064,10 @@ class NeonRunner {
             });
         }
         
-        // Hide the ball
-        this.ball.visible = false;
+        // Hide the bunny
+        if (this.bunnyGroup) {
+            this.bunnyGroup.visible = false;
+        }
         this.ballGlow.visible = false;
         
         // Create shockwave
@@ -1018,7 +1080,11 @@ class NeonRunner {
         });
         
         const shockwave = new THREE.Mesh(shockwaveGeometry, shockwaveMaterial);
-        shockwave.position.copy(this.ball.position);
+        if (this.bunnyGroup) {
+            shockwave.position.copy(this.bunnyGroup.position);
+        } else {
+            shockwave.position.copy(this.ball.position);
+        }
         shockwave.rotation.x = Math.PI / 2;
         this.scene.add(shockwave);
         
@@ -1136,7 +1202,7 @@ class NeonRunner {
     }
     
     jump() {
-        // Apply upward force to ball - medium jump power
+        // Apply upward force to bunny - medium jump power
         const jumpForce = this.hasSuperJump ? 220 : 130; // Medium jump height
         this.ballBody.applyImpulse(new CANNON.Vec3(0, jumpForce, 0), this.ballBody.position);
         
@@ -1146,6 +1212,19 @@ class NeonRunner {
         
         // Add jump visual effect
         this.createJumpEffect();
+        
+        // Add a temporary upward rotation to the sprite when jumping
+        if (this.bunnyGroup && this.bunnyGroup.children[0]) {
+            // Tilt slightly backwards when jumping
+            this.bunnyGroup.rotation.x = -0.2;
+            
+            // After a short time, reset rotation
+            setTimeout(() => {
+                if (this.bunnyGroup) {
+                    this.bunnyGroup.rotation.x = 0;
+                }
+            }, 300);
+        }
     }
     
     createJumpEffect() {
