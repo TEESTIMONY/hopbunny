@@ -2,8 +2,8 @@ class NeonRunner {
     constructor() {
         // Game state
         this.score = 0;
-        this.speed = 20;
-        this.maxSpeed = 65;
+        this.speed = 22;
+        this.maxSpeed = 70;
         this.speedIncrement = 0.025;
         this.gameOver = false;
         this.trackWidth = 13;

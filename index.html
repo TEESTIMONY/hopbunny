@@ -10,13 +10,13 @@
         body {
             margin: 0;
             overflow: hidden;
-            font-family: 'Orbitron', Arial, sans-serif;
+            font-family: 'Bubblegum Sans', cursive;
             touch-action: none; /* Disable browser handling of touch gestures */
             position: fixed; /* Prevent bouncing on iOS */
             width: 100%;
             height: 100%;
-            background-color: #000008; /* Match scene background */
-            color: #0ff;
+            background-color: #1a53a1; /* Deeper blue background */
+            color: #fff;
         }
         canvas {
             display: block;
@@ -32,49 +32,48 @@
             left: 0;
             right: 0;
             text-align: center;
-            color: #0ff;
+            color: #fff;
             font-size: 28px;
             font-weight: bold;
-            text-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
             z-index: 10;
             pointer-events: none;
             padding: 15px;
-            background: rgba(0, 0, 20, 0.3);
-            backdrop-filter: blur(5px);
-            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            background: rgba(41, 128, 255, 0.7);
+            border-bottom: 3px solid #5ea8ff;
+            border-radius: 8px;
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
         }
         #score-value {
             font-size: 1.2em;
             padding: 0 10px;
-            background: linear-gradient(90deg, rgba(0,255,255,0.3) 0%, rgba(0,255,255,0.1) 100%);
+            background: #1a53a1;
             border-radius: 20px;
-            animation: glow 1.5s infinite alternate;
             display: inline-block;
             min-width: 100px;
+            border: 2px solid #5ea8ff;
+            color: #fff;
         }
-        @keyframes glow {
-            from { text-shadow: 0 0 5px #0ff, 0 0 10px #0ff; }
-            to { text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff; }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
         }
         #game-over {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: #0ff;
+            color: #fff;
             font-size: 24px;
             text-align: center;
-            text-shadow: 0 0 10px #0ff;
-            display: none;
             z-index: 20;
-            background-color: rgba(0, 4, 20, 0.85);
+            background-color: rgba(41, 128, 255, 0.9);
             padding: 30px;
-            border-radius: 8px;
+            border-radius: 20px;
             width: 280px;
             max-width: 90%;
-            border: 1px solid #0ff;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6), inset 0 0 8px rgba(0, 255, 255, 0.3);
-            backdrop-filter: blur(10px);
+            border: 4px solid #5ea8ff;
+            box-shadow: 0 10px 0 rgba(0, 0, 0, 0.2);
+            display: none;
             animation: fadeIn 0.5s ease-out;
         }
         
@@ -84,11 +83,9 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, 
-                transparent 0%, 
-                rgba(0, 255, 255, 0.5) 50%, 
-                transparent 100%);
+            height: 8px;
+            background: #5ea8ff;
+            border-radius: 4px 4px 0 0;
         }
         
         @keyframes fadeIn {
@@ -99,53 +96,47 @@
         #game-over h1 {
             margin: 0 0 15px 0;
             font-size: 2.6em;
-            letter-spacing: 3px;
-            animation: pulse 2s infinite;
-            text-transform: uppercase;
+            color: #c3e0ff;
             font-weight: 700;
             line-height: 0.9;
-        }
-        
-        @keyframes pulse {
-            0% { text-shadow: 0 0 10px #0ff, 0 0 20px #0ff; }
-            50% { text-shadow: 0 0 15px #0ff, 0 0 30px #0ff, 0 0 40px #0ff; }
-            100% { text-shadow: 0 0 10px #0ff, 0 0 20px #0ff; }
+            text-shadow: 2px 2px 0 #1a53a1, 4px 4px 0 rgba(0,0,0,0.2);
+            font-family: 'Fredoka One', cursive;
         }
         
         #final-score {
             font-size: 1.6em;
             color: #fff;
             margin: 15px 0;
-            text-shadow: 0 0 10px #0ff;
+            font-weight: bold;
         }
         
         #restart-btn {
-            background: none;
-            border: 1px solid #0ff;
-            color: #0ff;
-            padding: 7px 30px;
-            font-size: 16px;
+            background: #2f80ed;
+            border: none;
+            color: white;
+            padding: 10px 30px;
+            font-size: 18px;
             cursor: pointer;
             margin-top: 10px;
             outline: none;
-            box-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
-            transition: all 0.2s;
             border-radius: 30px;
             letter-spacing: 2px;
             text-transform: uppercase;
-            font-family: 'Orbitron', Arial, sans-serif;
+            font-family: 'Bubblegum Sans', cursive;
+            font-weight: bold;
             position: relative;
-            overflow: hidden;
+            box-shadow: 0 6px 0 #1a53a1;
+            transition: all 0.1s;
         }
         
         #restart-btn:hover {
-            background-color: rgba(0, 255, 255, 0.15);
-            box-shadow: 0 0 12px rgba(0, 255, 255, 0.7);
-            transform: scale(1.03);
+            transform: translateY(2px);
+            box-shadow: 0 4px 0 #1a53a1;
         }
         
         #restart-btn:active {
-            transform: scale(0.98);
+            transform: translateY(6px);
+            box-shadow: 0 0 0 #1a53a1;
         }
         #mobile-controls {
             display: none;
@@ -157,24 +148,26 @@
             z-index: 10;
             background: none;
             pointer-events: none;
+            opacity: 1;
+            transition: opacity 0.5s ease;
         }
         #left-control, #right-control, #jump-control {
             position: absolute;
             width: 33.33%;
             height: 100%;
             bottom: 0;
-            opacity: 0.12;
-            background-color: #0ff;
-            border: 1px solid rgba(0, 255, 255, 0.2);
-            backdrop-filter: none;
+            opacity: 0.3;
+            background-color: #2f80ed;
+            border: 2px solid #5ea8ff;
+            border-radius: 15px 15px 0 0;
             pointer-events: auto;
             transition: opacity 0.15s ease;
             -webkit-tap-highlight-color: transparent;
         }
         #left-control:active, #right-control:active, #jump-control:active,
         #left-control.control-active, #right-control.control-active, #jump-control.control-active {
-            opacity: 0.25;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4) inset;
+            opacity: 0.6;
+            box-shadow: 0 0 20px rgba(94, 168, 255, 0.4) inset;
         }
         #left-control {
             left: 0;
@@ -210,12 +203,11 @@
             left: 0;
             width: 100%;
             text-align: center;
-            color: rgba(0, 255, 255, 0.7);
-            font-size: 12px;
+            color: #c3e0ff;
+            font-size: 14px;
             text-transform: uppercase;
             letter-spacing: 1px;
             font-weight: bold;
-            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
             pointer-events: none;
             opacity: 0.7;
         }
@@ -229,7 +221,7 @@
             height: 0;
             border-top: 15px solid transparent;
             border-bottom: 15px solid transparent;
-            border-right: 25px solid rgba(0, 255, 255, 0.9);
+            border-right: 25px solid #c3e0ff;
             transform: translate(-30%, -50%);
         }
         
@@ -242,7 +234,7 @@
             height: 0;
             border-top: 15px solid transparent;
             border-bottom: 15px solid transparent;
-            border-left: 25px solid rgba(0, 255, 255, 0.9);
+            border-left: 25px solid #c3e0ff;
             transform: translate(-70%, -50%);
         }
         
@@ -255,7 +247,7 @@
             height: 0;
             border-left: 15px solid transparent;
             border-right: 15px solid transparent;
-            border-bottom: 25px solid rgba(0, 255, 255, 0.9);
+            border-bottom: 25px solid #c3e0ff;
             transform: translate(-50%, -30%);
         }
         
@@ -282,10 +274,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 20, 0.4);
+            background-color: rgba(0, 20, 60, 0.4);
             z-index: 15;
             display: none;
-            backdrop-filter: blur(2px);
         }
         
         /* Start screen styles */
@@ -294,19 +285,17 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: #0ff;
+            color: #fff;
             font-size: 24px;
             text-align: center;
-            text-shadow: 0 0 10px #0ff;
             z-index: 25;
-            background-color: rgba(0, 4, 20, 0.85);
+            background-color: rgba(1, 26, 63, 0.9);
             padding: 30px;
-            border-radius: 8px;
-            width: 280px;
+            border-radius: 20px;
+            width: 320px;
             max-width: 90%;
-            border: 1px solid #0ff;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6), inset 0 0 8px rgba(0, 255, 255, 0.3);
-            backdrop-filter: blur(10px);
+            border: 4px solid #022246;
+            box-shadow: 0 10px 0 rgba(0, 0, 0, 0.2);
             overflow: hidden;
         }
         
@@ -316,60 +305,64 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, 
-                transparent 0%, 
-                rgba(0, 255, 255, 0.5) 50%, 
-                transparent 100%);
+            height: 8px;
+            background: #5ea8ff;
+            border-radius: 4px 4px 0 0;
+        }
+
+        #bunny-character {
+            width: 180px;
+            height: auto;
+            margin: 0 auto 10px auto;
+            display: block;
+            animation: bounce 2s ease infinite;
         }
         
         #start-screen h1 {
             margin: 0 0 15px 0;
             font-size: 2.8em;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff;
+            color: #c3e0ff;
             font-weight: 700;
             line-height: 0.9;
+            text-shadow: 2px 2px 0 #1a53a1, 4px 4px 0 rgba(0,0,0,0.2);
+            font-family: 'Fredoka One', cursive;
         }
         
         #start-screen p {
-            font-size: 0.8em;
+            font-size: 0.9em;
             margin: 8px 0 20px;
-            color: rgba(255, 255, 255, 0.8);
-            text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
-            letter-spacing: 1px;
+            color: #e6f0ff;
             line-height: 1.4;
             padding: 0 5px;
         }
         
         #play-btn {
-            background: none;
-            border: 1px solid #0ff;
-            color: #0ff;
-            padding: 7px 30px;
-            font-size: 16px;
+            background: #2f80ed;
+            border: none;
+            color: white;
+            padding: 10px 30px;
+            font-size: 18px;
             cursor: pointer;
             margin-top: 10px;
             outline: none;
-            box-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
-            transition: all 0.2s;
             border-radius: 30px;
             letter-spacing: 2px;
             text-transform: uppercase;
-            font-family: 'Orbitron', Arial, sans-serif;
+            font-family: 'Bubblegum Sans', cursive;
+            font-weight: bold;
             position: relative;
-            overflow: hidden;
+            box-shadow: 0 6px 0 #1a53a1;
+            transition: all 0.1s;
         }
         
         #play-btn:hover {
-            background-color: rgba(0, 255, 255, 0.15);
-            box-shadow: 0 0 12px rgba(0, 255, 255, 0.7);
-            transform: scale(1.03);
+            transform: translateY(2px);
+            box-shadow: 0 4px 0 #1a53a1;
         }
         
         #play-btn:active {
-            transform: scale(0.98);
+            transform: translateY(6px);
+            box-shadow: 0 0 0 #1a53a1;
         }
         
         #version-info {
@@ -377,7 +370,7 @@
             bottom: 5px;
             right: 10px;
             font-size: 10px;
-            color: rgba(0, 255, 255, 0.5);
+            color: rgba(197, 235, 255, 0.5);
             pointer-events: none;
         }
         
@@ -410,6 +403,7 @@
         @media (max-width: 768px) {
             #mobile-controls {
                 display: block;
+                opacity: 1;
             }
             #ui {
                 top: 10px;
@@ -426,7 +420,7 @@
                 width: 70%;
                 max-width: 250px;
                 bottom: 15px;
-                height: 6px;
+                height: 8px;
             }
             #game-over {
                 font-size: 18px;
@@ -450,6 +444,9 @@
             #start-screen h1 {
                 font-size: 2.2em;
             }
+            #bunny-character {
+                width: 140px;
+            }
             #play-btn, #restart-btn {
                 padding: 6px 25px;
                 font-size: 14px;
@@ -460,6 +457,7 @@
             #mobile-controls {
                 height: 100%;
                 display: flex;
+                opacity: 1;
             }
             #left-control, #right-control {
                 width: 40%;
@@ -489,6 +487,10 @@
             }
             #start-screen p {
                 margin: 5px 0 15px;
+            }
+            #bunny-character {
+                width: 100px;
+                margin-bottom: 5px;
             }
             .speed-indicator {
                 bottom: 10px;
@@ -526,6 +528,9 @@
             #start-screen h1 {
                 font-size: 1.8em;
             }
+            #bunny-character {
+                width: 120px;
+            }
             #play-btn, #restart-btn {
                 padding: 5px 20px;
                 font-size: 13px;
@@ -534,20 +539,7 @@
         
         /* Visual effects */
         .scanlines {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                to bottom,
-                transparent 0px,
-                rgba(0, 0, 0, 0.05) 1px,
-                transparent 2px
-            );
-            pointer-events: none;
-            z-index: 15;
-            opacity: 0.3;
+            display: none; /* Remove neon effect */
         }
         
         .vignette {
@@ -558,8 +550,8 @@
             height: 100%;
             background: radial-gradient(
                 circle,
-                transparent 60%,
-                rgba(0, 0, 40, 0.4) 100%
+                transparent 70%,
+                rgba(21, 50, 118, 0.5) 100%
             );
             pointer-events: none;
             z-index: 15;
@@ -572,23 +564,21 @@
             left: 50%;
             transform: translateX(-50%);
             width: 300px;
-            height: 8px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(0, 255, 255, 0.3);
+            height: 12px;
+            background: rgba(41, 128, 255, 0.5);
+            border: 3px solid #5ea8ff;
             border-radius: 10px;
             z-index: 20;
             overflow: hidden;
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
         }
         
         .speed-bar {
             height: 100%;
             width: 30%;
             background: linear-gradient(90deg, 
-                rgba(0, 255, 255, 0.5) 0%, 
-                rgba(0, 255, 255, 0.8) 50%, 
-                rgba(255, 0, 255, 0.8) 100%);
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+                #c3e0ff 0%, 
+                #5ea8ff 100%);
         }
         
         #fx-container {
@@ -602,7 +592,18 @@
         }
     </style>
     <!-- Add Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Bubblegum Sans', cursive;
+        }
+        #start-screen h1, #game-over h1 {
+            font-family: 'Fredoka One', cursive;
+        }
+        #play-btn, #restart-btn {
+            font-family: 'Bubblegum Sans', cursive;
+        }
+    </style>
 </head>
 <body>
     <div id="ui">
@@ -614,7 +615,6 @@
     
     <!-- Visual effects overlays -->
     <div id="fx-container">
-        <div class="scanlines"></div>
         <div class="vignette"></div>
     </div>
     
@@ -623,15 +623,14 @@
     
     <!-- Start screen -->
     <div id="start-screen">
-        <div class="neon-grid"></div>
-        <h1>NEON<br>RUNNER</h1>
-        <p>Race through the neon grid, avoid obstacles and set your highscore in this cyberpunk challenge!</p>
+        <img id="bunny-character" src="img/img2.png" alt="Blue Bunny Character">
+        <h1>BUNNY<br>RUNNER</h1>
+        <p>Join our bunny hero on an epic adventure! Dodge obstacles and collect treasures in this fun cartoon world!</p>
         <button id="play-btn">PLAY</button>
-        <div id="version-info">v1.0 Developed by Delo🚀</div>
+        <div id="version-info">v1.0</div>
     </div>
     
     <div id="game-over">
-        <div class="neon-grid"></div>
         <h1>GAME OVER</h1>
         <p>Final Score: <span id="final-score">0</span></p>
         <button id="restart-btn">PLAY AGAIN</button>
@@ -641,7 +640,7 @@
     <div id="mobile-controls">
         <div id="left-control">
             <div id="left-icon" class="control-icon"></div>
-            <div class="control-label">MOVE RIGHT</div>
+            <div class="control-label">MOVE LEFT</div>
         </div>
         <div id="jump-control">
             <div id="jump-icon" class="control-icon"></div>
@@ -649,7 +648,7 @@
         </div>
         <div id="right-control">
             <div id="right-icon" class="control-icon"></div>
-            <div class="control-label">MOVE LEFT</div>
+            <div class="control-label">MOVE RIGHT</div>
         </div>
     </div>
 
@@ -667,9 +666,45 @@
             const playBtn = document.getElementById('play-btn');
             const uiElement = document.getElementById('ui');
             const restartBtn = document.getElementById('restart-btn');
+            const mobileControls = document.getElementById('mobile-controls');
+            let controlsTimer;
             
             // Initially hide the UI
             uiElement.style.display = 'none';
+            
+            // Function to show controls
+            function showControls() {
+                if (mobileControls) {
+                    mobileControls.style.opacity = '1';
+                    mobileControls.style.transition = 'opacity 0.3s ease';
+                    
+                    // Clear any existing timer
+                    clearTimeout(controlsTimer);
+                    
+                    // Set timer to fade controls after 3 seconds
+                    controlsTimer = setTimeout(function() {
+                        mobileControls.style.opacity = '0.1';
+                    }, 3000);
+                }
+            }
+            
+            // Event listeners to show controls on touch
+            if (mobileControls) {
+                // Set initial styles
+                mobileControls.style.transition = 'opacity 0.5s ease';
+                
+                // Show controls on any touch of the screen
+                document.addEventListener('touchstart', showControls);
+                
+                // Also show controls when touching the controls themselves
+                const leftControl = document.getElementById('left-control');
+                const rightControl = document.getElementById('right-control');
+                const jumpControl = document.getElementById('jump-control');
+                
+                if (leftControl) leftControl.addEventListener('touchstart', showControls);
+                if (rightControl) rightControl.addEventListener('touchstart', showControls);
+                if (jumpControl) jumpControl.addEventListener('touchstart', showControls);
+            }
             
             // Start button functionality
             playBtn.addEventListener('click', function() {
@@ -678,6 +713,9 @@
                 
                 // Add entry animation to UI
                 uiElement.style.animation = 'fadeIn 0.5s ease-out';
+                
+                // Show controls initially when game starts
+                showControls();
                 
                 // Start the game by triggering the necessary function in game.js
                 if (typeof startGame === 'function') {
@@ -702,6 +740,9 @@
                     if (window.game && typeof window.game.restart === 'function') {
                         window.game.restart();
                     }
+                    
+                    // Show controls when game restarts
+                    showControls();
                 });
             }
         });
